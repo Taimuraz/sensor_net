@@ -8,9 +8,25 @@ class DrawingMode(Enum):
     F = 2
     T = 3
 
+class Node:
+    x = 0
+    y = 0
+    r = 0
+    type = 'bs'
+
+    def __init__(self, x=0, y=0, r=0, node_type='bs'):
+        self.x = x
+        self.y = y
+        self.r = r
+        self.node_type = node_type
+
+    def __repr__(self):
+        return 'x={}, y={}, type={}'.format(self.x , self.y, self.node_type)
+
 
 class MainView:
-    def __init__(self, master, width=1024, height=700):
+
+    def __init__(self, master, minimal_distance = 0,width=1024, height=700):
         self.bs_color = 'blue'
         self.f_color = 'green'
         self.t_color = 'red'
@@ -18,6 +34,8 @@ class MainView:
         self.f_radius = 30
         self.t_radius = 20
         self.mode = DrawingMode.NONE
+
+        self.nodes = []
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -50,16 +68,17 @@ class MainView:
         y = event.y
 
         if self.mode == DrawingMode.BS:
-            self.canvas.create_oval([x - self.bs_radius, y - self.bs_radius], [x + self.bs_radius, y + self.bs_radius],
-                                    fill=self.bs_color)
-
+            self.canvas.create_oval([x - self.bs_radius, y - self.bs_radius], [x + self.bs_radius, y + self.bs_radius], fill=self.bs_color)
+            self.nodes.append(Node(x, y, 'bs'))
         elif self.mode == DrawingMode.F:
-            self.canvas.create_oval([x - self.f_radius, y - self.f_radius], [x + self.f_radius, y + self.f_radius],
-                                    fill=self.f_color)
+            self.canvas.create_oval([x - self.f_radius, y - self.f_radius], [x + self.f_radius, y + self.f_radius], fill=self.f_color)
+            self.nodes.append(Node(x, y, 'f'))
 
         elif self.mode == DrawingMode.T:
-            self.canvas.create_oval([x - self.t_radius, y - self.t_radius], [x + self.t_radius, y + self.t_radius],
-                                    fill=self.t_color)
+            self.canvas.create_oval([x - self.t_radius, y - self.t_radius], [x + self.t_radius, y + self.t_radius], fill=self.t_color)
+            self.nodes.append(Node(x, y, 't'))
+
+        print(self.nodes)
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
