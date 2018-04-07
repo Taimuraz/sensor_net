@@ -11,7 +11,14 @@ class DrawingMode(Enum):
 
 class MainView:
     def __init__(self, master, width=1024, height=700):
+        self.bs_color = 'blue'
+        self.f_color = 'green'
+        self.t_color = 'red'
+        self.bs_radius = 40
+        self.f_radius = 30
+        self.t_radius = 20
         self.mode = DrawingMode.NONE
+
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
 
@@ -30,7 +37,7 @@ class MainView:
         self.btn_exit = Button(menu_frame, text="Выход", fg="red", command=menu_frame.quit)
         self.btn_exit.pack(fill=X)
 
-        self.canvas = Canvas(master, bg='green', height=height)
+        self.canvas = Canvas(master, height=height)
         self.canvas.pack(fill=X)
 
         self.canvas.bind('<Button-1>', self.onCanvasClick)
@@ -41,15 +48,18 @@ class MainView:
     def onCanvasClick(self, event):
         x = event.x
         y = event.y
-        r = 30
-        self.canvas.create_oval([x - r, y - r], [x + r, y + r], fill='blue')
 
         if self.mode == DrawingMode.BS:
-            pass
+            self.canvas.create_oval([x - self.bs_radius, y - self.bs_radius], [x + self.bs_radius, y + self.bs_radius],
+                                    fill=self.bs_color)
+
         elif self.mode == DrawingMode.F:
-            pass
+            self.canvas.create_oval([x - self.f_radius, y - self.f_radius], [x + self.f_radius, y + self.f_radius],
+                                    fill=self.f_color)
+
         elif self.mode == DrawingMode.T:
-            pass
+            self.canvas.create_oval([x - self.t_radius, y - self.t_radius], [x + self.t_radius, y + self.t_radius],
+                                    fill=self.t_color)
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
@@ -59,9 +69,12 @@ class MainView:
 
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
-        print(btn_name)
-        self.btnRelief(self.btn_bs)
-        # if btn_name == 'botton':
+        if btn_name == 'button':
+            self.mode = DrawingMode.BS
+        elif btn_name == 'button2':
+            self.mode = DrawingMode.F
+        elif btn_name == 'button3':
+            self.mode = DrawingMode.T
 
 
 root = Tk()
