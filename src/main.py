@@ -87,10 +87,6 @@ class MainView:
             elif self.mode == DrawingMode.F:
                 self.drawCircle(x, y, self.f_color)
                 self.nodes.append(Node(x, y, 'f'))
-            elif self.mode == DrawingMode.T:
-                self.drawCircle(x, y, self.t_color)
-                self.nodes.append(Node(x, y, 't'))
-        print(self.nodes[0])
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
@@ -104,8 +100,6 @@ class MainView:
             self.mode = DrawingMode.BS
         elif btn_name == 'button2':
             self.mode = DrawingMode.F
-        elif btn_name == 'button3':
-            self.mode = DrawingMode.T
 
 
 root = Tk()
