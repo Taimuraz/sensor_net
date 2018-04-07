@@ -70,20 +70,22 @@ class MainView:
                 result = False
         return result
 
+    def drawCircle(self, x, y, color):
+        self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=color)
+
     def onCanvasClick(self, event):
         x = event.x
         y = event.y
         if self.isValidDistance(x, y):
             if self.mode == DrawingMode.BS:
-                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.bs_color)
+                self.drawCircle( x, y, self.bs_color)
                 self.nodes.append(Node(x, y, 'bs'))
             elif self.mode == DrawingMode.F:
-                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.f_color)
+                self.drawCircle( x, y, self.f_color)
                 self.nodes.append(Node(x, y, 'f'))
             elif self.mode == DrawingMode.T:
-                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.t_color)
+                self.drawCircle( x, y, self.t_color)
                 self.nodes.append(Node(x, y, 't'))
-
         print(self.nodes[0])
 
     def btnRelief(self, btn):
