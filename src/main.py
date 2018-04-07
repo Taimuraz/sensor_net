@@ -46,12 +46,18 @@ class MainView:
         self.btn_f = Button(menu_frame, text="Добавить Ф узел")
         self.btn_f.pack(fill=X)
 
+        self.label_wdgt = Label(menu_frame, text="Число T узлов")
+        self.label_wdgt.pack(fill=X)
+
         self.entry_widg = Entry(menu_frame)
         self.entry_widg.insert(0, '9')
         self.entry_widg.pack(fill=X)
 
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
         self.btn_t.pack(fill=X)
+
+        self.btn_clean = Button(menu_frame, text="Очистить поле")
+        self.btn_clean.pack(fill=X)
 
         self.btn_exit = Button(menu_frame, text="Выход", fg="red", command=menu_frame.quit)
         self.btn_exit.pack(fill=X)
@@ -63,6 +69,7 @@ class MainView:
         self.btn_bs.bind('<Button-1>', self.onButtonClick)
         self.btn_t.bind('<Button-1>', self.onButtonClick)
         self.btn_f.bind('<Button-1>', self.onButtonClick)
+        self.btn_clean.bind('<Button-1>', self.onButtonClick)
 
     def isValidDistance(self, x, y):
         result = True
@@ -94,12 +101,18 @@ class MainView:
         else:
             btn['relief'] = RAISED
 
+    def cleanCanvas(self):
+        self.canvas.delete('all')
+        del self.nodes[:]
+
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
         if btn_name == 'button':
             self.mode = DrawingMode.BS
         elif btn_name == 'button2':
             self.mode = DrawingMode.F
+        elif btn_name == 'button4':
+            self.cleanCanvas()
 
 
 root = Tk()
