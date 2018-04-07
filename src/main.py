@@ -1,6 +1,6 @@
 from tkinter import *
 from enum import Enum
-
+from math import sqrt
 
 class DrawingMode(Enum):
     NONE = 0
@@ -11,13 +11,11 @@ class DrawingMode(Enum):
 class Node:
     x = 0
     y = 0
-    r = 0
     type = 'bs'
 
-    def __init__(self, x=0, y=0, r=0, node_type='bs'):
+    def __init__(self, x=0, y=0, node_type='bs'):
         self.x = x
         self.y = y
-        self.r = r
         self.node_type = node_type
 
     def __repr__(self):
@@ -30,9 +28,9 @@ class MainView:
         self.bs_color = 'blue'
         self.f_color = 'green'
         self.t_color = 'red'
-        self.bs_radius = 40
-        self.f_radius = 30
-        self.t_radius = 20
+        self.node_radius = 30
+        self.minimal_distance = minimal_distance
+
         self.mode = DrawingMode.NONE
 
         self.nodes = []
@@ -63,22 +61,30 @@ class MainView:
         self.btn_t.bind('<Button-1>', self.onButtonClick)
         self.btn_f.bind('<Button-1>', self.onButtonClick)
 
+    def isValidDistance(self, x, y):
+        result = True
+        critical_distance = self.minimal_distance + 2 * self.node_radius
+        for node in self.nodes:
+            distance = sqrt((x - node.x) ** 2 + (y - node.y) ** 2)
+            if distance < critical_distance:
+                result = False
+        return result
+
     def onCanvasClick(self, event):
         x = event.x
         y = event.y
+        if self.isValidDistance(x, y):
+            if self.mode == DrawingMode.BS:
+                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.bs_color)
+                self.nodes.append(Node(x, y, 'bs'))
+            elif self.mode == DrawingMode.F:
+                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.f_color)
+                self.nodes.append(Node(x, y, 'f'))
+            elif self.mode == DrawingMode.T:
+                self.canvas.create_oval([x - self.node_radius, y - self.node_radius], [x + self.node_radius, y + self.node_radius], fill=self.t_color)
+                self.nodes.append(Node(x, y, 't'))
 
-        if self.mode == DrawingMode.BS:
-            self.canvas.create_oval([x - self.bs_radius, y - self.bs_radius], [x + self.bs_radius, y + self.bs_radius], fill=self.bs_color)
-            self.nodes.append(Node(x, y, 'bs'))
-        elif self.mode == DrawingMode.F:
-            self.canvas.create_oval([x - self.f_radius, y - self.f_radius], [x + self.f_radius, y + self.f_radius], fill=self.f_color)
-            self.nodes.append(Node(x, y, 'f'))
-
-        elif self.mode == DrawingMode.T:
-            self.canvas.create_oval([x - self.t_radius, y - self.t_radius], [x + self.t_radius, y + self.t_radius], fill=self.t_color)
-            self.nodes.append(Node(x, y, 't'))
-
-        print(self.nodes)
+        print(self.nodes[0])
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
@@ -99,7 +105,7 @@ class MainView:
 root = Tk()
 canv = Canvas(root, width=30, height=30)
 canv.pack()
-app = MainView(root)
+app = MainView(root, minimal_distance = 20)
 
 root.mainloop()
 root.destroy()  # optional; see description below
