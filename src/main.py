@@ -15,7 +15,7 @@ class Node:
     id = 0
     x = 0
     y = 0
-    type = 'bs'
+    node_type = 'bs'
 
     def __init__(self, id=0, x=0, y=0, node_type='bs'):
         self.x = x
@@ -97,7 +97,7 @@ class MainView:
     def isBsAdded(self):
         result = False
         for node in self.nodes:
-            if node.type == 'bs':
+            if node.node_type == 'bs':
                 result = True
         return result
 
@@ -132,7 +132,7 @@ class MainView:
         if make_step:
             if self.isValidDistance(x, y):
                 self.node_id += 1
-                self.nodes.append(Node(self.node_id, x, y, node_type))
+                self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
                 self.defineBounds(x, y)
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                         [x + self.node_radius, y + self.node_radius], fill=node_color)
