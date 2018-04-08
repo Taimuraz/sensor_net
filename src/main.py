@@ -11,13 +11,15 @@ class DrawingMode(Enum):
 
 
 class Node:
+    id = 0
     x = 0
     y = 0
     type = 'bs'
 
-    def __init__(self, x=0, y=0, node_type='bs'):
+    def __init__(self, id=0, x=0, y=0, node_type='bs'):
         self.x = x
         self.y = y
+        self.id = id
         self.node_type = node_type
 
     def __repr__(self):
@@ -34,7 +36,7 @@ class MainView:
         self.minimal_distance = minimal_distance
         self.mode = DrawingMode.NONE
         self.nodes = []
-
+        self.node_id = 0
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
         menu_frame = Frame(master)
@@ -84,16 +86,25 @@ class MainView:
         self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                 [x + self.node_radius, y + self.node_radius], fill=color)
 
+    def noBsAdded(self):
+        result = True
+        for node in self.nodes:
+            if node.type == 'bs':
+                result = False
+        return result
+
     def onCanvasClick(self, event):
         x = event.x
         y = event.y
         if self.isValidDistance(x, y):
             if self.mode == DrawingMode.BS:
-                self.drawCircle(x, y, self.bs_color)
-                self.nodes.append(Node(x, y, 'bs'))
+                if self.noBsAdded():
+                    self.drawCircle(x, y, self.bs_color)
+                    self.nodes.append(Node(self.node_id, x, y, 'bs'))
             elif self.mode == DrawingMode.F:
                 self.drawCircle(x, y, self.f_color)
-                self.nodes.append(Node(x, y, 'f'))
+                self.nodes.append(Node(self.node_id, x, y, 'f'))
+            self.node_id += 1
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
