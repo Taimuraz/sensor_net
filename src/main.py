@@ -123,14 +123,10 @@ class MainView:
         del self.nodes[:]
 
     def generateT(self):
-        x = random.uniform(0, 500)
-        y = random.uniform(0, 500)
-        if self.isValidDistance(x, y):
-            node = Node(self.node_id, x, y, 't')
-            self.drawCircle(x, y, 'yellow')
-            self.nodes.append(node)
-            self.node_id += 1
-        print(self.nodes)
+        for i in range(int(self.entry_widg.get())):
+            x = random.uniform(0, 500)
+            y = random.uniform(0, 500)
+            self.drawCircle(x, y, 'yellow', 't')
 
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
