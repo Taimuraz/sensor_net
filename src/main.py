@@ -42,6 +42,7 @@ class MainView:
         self.x_max = 0
         self.y_min = 10000
         self.y_max = 0
+        self.adjacency_map = dict()  # список смежности графа.
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -131,16 +132,22 @@ class MainView:
 
         if make_step:
             if self.isValidDistance(x, y):
-                self.node_id += 1
                 self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
+                self.node_id += 1
                 self.defineBounds(x, y)
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
-                                        [x + self.node_radius, y + self.node_radius], fill=node_color)
+                                        [x + self.node_radius, y + self.node_radius],
+                                        fill=node_color)
             else:
                 return False
         return True
         # print(self.y_min,"  ",self.y_max)
 
+    def drawLine(self, x0, y0, x1, y1):
+        self.canvas.create_line( x0, y0, x1, y1, fill='black')
+
+    def generateEdges(self):
+        pass
 
     def generateT(self):
         iter = 0
@@ -149,13 +156,17 @@ class MainView:
             y = random.uniform(self.y_min, self.y_max)
             res = self.drawCircle(x, y, 'yellow', 't')
             if res == False:
-                while res != True :
+                while res != True:
                     x = random.uniform(self.x_min, self.x_max)
                     y = random.uniform(self.y_min, self.y_max)
                     res = self.drawCircle(x, y, 'yellow', 't')
                     if iter > 1000: break
                     iter += 1
-
+        # генерация случайных связей в графе
+        for i in range(len(self.nodes)):
+            vertex_first = random.randint(0, len(self.nodes) - 1)
+            vertex_second = random.randint(0, len(self.nodes) - 1)
+            self.drawLine(self.nodes[vertex_first].x , self.nodes[vertex_first].y, self.nodes[vertex_second].x , self.nodes[vertex_second].y)
 
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
@@ -172,7 +183,7 @@ class MainView:
 root = Tk()
 canv = Canvas(root, width=30, height=30)
 canv.pack()
-app = MainView(root, minimal_distance=5)
+app = MainView(root, minimal_distance=10)
 
 root.mainloop()
 root.destroy()  # optional; see description below
