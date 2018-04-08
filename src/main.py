@@ -88,21 +88,6 @@ class MainView:
                 result = False
         return result
 
-    def drawCircle(self, x, y, node_color, node_type):
-        make_step = True
-        if node_type == 'bs':
-            if self.isBsAdded():
-                make_step = False
-
-        if make_step:
-            if self.isValidDistance(x, y):
-                self.node_id += 1
-                self.nodes.append(Node(self.node_id, x, y, node_type))
-                self.defineBounds(x, y)
-                self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
-                                        [x + self.node_radius, y + self.node_radius], fill=node_color)
-        print(self.y_min,"  ",self.y_max)
-
     def defineBounds(self, x, y):
         if x < self.x_min: self.x_min = x
         if x > self.x_max: self.x_max = x
@@ -138,11 +123,39 @@ class MainView:
         self.y_min = 10000
         self.y_max = 0
 
+    def drawCircle(self, x, y, node_color, node_type):
+        make_step = True
+        if node_type == 'bs':
+            if self.isBsAdded():
+                make_step = False
+
+        if make_step:
+            if self.isValidDistance(x, y):
+                self.node_id += 1
+                self.nodes.append(Node(self.node_id, x, y, node_type))
+                self.defineBounds(x, y)
+                self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
+                                        [x + self.node_radius, y + self.node_radius], fill=node_color)
+            else:
+                return False
+        return True
+        # print(self.y_min,"  ",self.y_max)
+
+
     def generateT(self):
+        iter = 0
         for i in range(int(self.entry_widg.get())):
             x = random.uniform(self.x_min, self.x_max)
             y = random.uniform(self.y_min, self.y_max)
-            self.drawCircle(x, y, 'yellow', 't')
+            res = self.drawCircle(x, y, 'yellow', 't')
+            if res == False:
+                while res != True :
+                    x = random.uniform(self.x_min, self.x_max)
+                    y = random.uniform(self.y_min, self.y_max)
+                    res = self.drawCircle(x, y, 'yellow', 't')
+                    if iter > 1000: break
+                    iter += 1
+
 
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
