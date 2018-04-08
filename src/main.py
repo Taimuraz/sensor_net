@@ -1,6 +1,7 @@
 from tkinter import *
 from enum import Enum
 from math import sqrt
+import random
 
 
 class DrawingMode(Enum):
@@ -23,7 +24,7 @@ class Node:
         self.node_type = node_type
 
     def __repr__(self):
-        return 'x={}, y={}, type={}'.format(self.x, self.y, self.node_type)
+        return 'id={} x={}, y={}, type={}'.format(self.id, self.x, self.y, self.node_type)
 
 
 class MainView:
@@ -82,29 +83,34 @@ class MainView:
                 result = False
         return result
 
-    def drawCircle(self, x, y, color):
-        self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
-                                [x + self.node_radius, y + self.node_radius], fill=color)
+    def drawCircle(self, x, y, node_color, node_type):
+        make_step = True
+        if node_type == 'bs':
+            if self.isBsAdded():
+                make_step = False
 
-    def noBsAdded(self):
-        result = True
+        if make_step:
+            if self.isValidDistance(x, y):
+                self.node_id += 1
+                self.nodes.append(Node(self.node_id, x, y, node_type))
+                self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
+                                        [x + self.node_radius, y + self.node_radius], fill=node_color)
+        print(self.nodes)
+
+    def isBsAdded(self):
+        result = False
         for node in self.nodes:
             if node.type == 'bs':
-                result = False
+                result = True
         return result
 
     def onCanvasClick(self, event):
         x = event.x
         y = event.y
-        if self.isValidDistance(x, y):
-            if self.mode == DrawingMode.BS:
-                if self.noBsAdded():
-                    self.drawCircle(x, y, self.bs_color)
-                    self.nodes.append(Node(self.node_id, x, y, 'bs'))
-            elif self.mode == DrawingMode.F:
-                self.drawCircle(x, y, self.f_color)
-                self.nodes.append(Node(self.node_id, x, y, 'f'))
-            self.node_id += 1
+        if self.mode == DrawingMode.BS:
+            self.drawCircle(x, y, self.bs_color, 'bs')
+        elif self.mode == DrawingMode.F:
+            self.drawCircle(x, y, self.f_color, 'f')
 
     def btnRelief(self, btn):
         if btn['relief'] == 'raised':
@@ -116,12 +122,24 @@ class MainView:
         self.canvas.delete('all')
         del self.nodes[:]
 
+    def generateT(self):
+        x = random.uniform(0, 500)
+        y = random.uniform(0, 500)
+        if self.isValidDistance(x, y):
+            node = Node(self.node_id, x, y, 't')
+            self.drawCircle(x, y, 'yellow')
+            self.nodes.append(node)
+            self.node_id += 1
+        print(self.nodes)
+
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
         if btn_name == 'button':
             self.mode = DrawingMode.BS
         elif btn_name == 'button2':
             self.mode = DrawingMode.F
+        elif btn_name == 'button3':
+            self.generateT()
         elif btn_name == 'button4':
             self.cleanCanvas()
 
