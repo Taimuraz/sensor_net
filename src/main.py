@@ -32,7 +32,7 @@ class MainView:
         self.bs_color = 'blue'
         self.f_color = 'green'
         self.t_color = 'red'
-        self.node_radius = 30
+        self.node_radius = 15
         self.minimal_distance = minimal_distance
         self.mode = DrawingMode.NONE
         self.nodes = []
