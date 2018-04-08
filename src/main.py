@@ -38,6 +38,11 @@ class MainView:
         self.mode = DrawingMode.NONE
         self.nodes = []
         self.node_id = 0
+        self.x_min = 10000
+        self.x_max = 0
+        self.y_min = 10000
+        self.y_max = 0
+
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
         menu_frame = Frame(master)
@@ -93,9 +98,16 @@ class MainView:
             if self.isValidDistance(x, y):
                 self.node_id += 1
                 self.nodes.append(Node(self.node_id, x, y, node_type))
+                self.defineBounds(x, y)
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                         [x + self.node_radius, y + self.node_radius], fill=node_color)
-        print(self.nodes)
+        print(self.y_min,"  ",self.y_max)
+
+    def defineBounds(self, x, y):
+        if x < self.x_min: self.x_min = x
+        if x > self.x_max: self.x_max = x
+        if y < self.y_min: self.y_min = y
+        if y > self.y_max: self.y_max = y
 
     def isBsAdded(self):
         result = False
@@ -121,11 +133,15 @@ class MainView:
     def cleanCanvas(self):
         self.canvas.delete('all')
         del self.nodes[:]
+        self.x_min = 10000
+        self.x_max = 0
+        self.y_min = 10000
+        self.y_max = 0
 
     def generateT(self):
         for i in range(int(self.entry_widg.get())):
-            x = random.uniform(0, 500)
-            y = random.uniform(0, 500)
+            x = random.uniform(self.x_min, self.x_max)
+            y = random.uniform(self.y_min, self.y_max)
             self.drawCircle(x, y, 'yellow', 't')
 
     def onButtonClick(self, event):
@@ -143,7 +159,7 @@ class MainView:
 root = Tk()
 canv = Canvas(root, width=30, height=30)
 canv.pack()
-app = MainView(root, minimal_distance=20)
+app = MainView(root, minimal_distance=5)
 
 root.mainloop()
 root.destroy()  # optional; see description below
