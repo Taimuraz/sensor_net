@@ -208,16 +208,16 @@ class PathSearcher:
         self.pathways = []
 
     def dfs(self, curr_node, target_node):
+        self.tmp_path.append(curr_node)
         if curr_node != target_node:
             self.visited[curr_node] = True
-        self.tmp_path.append(curr_node)
         if curr_node == target_node:
             self.pathways.append(self.tmp_path.copy())
-
+            self.tmp_path.remove(curr_node)
+            return
         for w in self.adj_list[curr_node]:
             if not self.visited[w]:  # посещён ли текущий сосед?
                 self.dfs(w, target_node)
-        # print(self.tmp_path, " ", target_node)
         self.tmp_path.remove(curr_node)
 
     def print_pathways(self):
@@ -232,10 +232,10 @@ if __name__ == '__main__':
                 [0, 3],
                 [],
                 [0, 7, 8],
-                [6],
-                [6],
+                [6, 8],
+                [6, 7],
                 [1]
                 ]
     p = PathSearcher(adj_list=adj_list)
-    p.dfs(0,4)
+    p.dfs(0,7)
     p.print_pathways()
