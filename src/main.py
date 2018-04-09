@@ -43,7 +43,7 @@ class MainView:
         self.x_max = 0
         self.y_min = 10000
         self.y_max = 0
-        self.adjacency_map = dict()  # словарь смежности графа.
+        self.adjacency_map = []  # словарь смежности графа.
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -157,12 +157,18 @@ class MainView:
         return res
 
     def generateEdges(self):
+        tmp_list = []
         self.achivable_radius = max(self.x_max - self.x_min,
                                     self.y_max - self.y_min) / 2  # максимальное расстояние между узлами делим пополам.
         for i in range(len(self.nodes)):  # это и есть радиус досигаемости
             neighbours = self.getAchivableNodes(self.nodes[i])
-            for node in neighbours:
-                self.drawLine(self.nodes[i].x, self.nodes[i].y, node.x, node.y)
+            for neighbour_node in neighbours:
+                self.drawLine(self.nodes[i].x, self.nodes[i].y, neighbour_node.x, neighbour_node.y)
+                tmp_list.append(neighbour_node.id)
+            self.adjacency_map.append(tmp_list.copy())
+            tmp_list.clear()
+
+        print(self.adjacency_map)
 
     def generateT(self):
         iter = 0
@@ -191,14 +197,6 @@ class MainView:
             self.cleanCanvas()
 
 
-# root = Tk()
-# canv = Canvas(root, width=30, height=30)
-# canv.pack()
-# app = MainView(root, minimal_distance=15)
-#
-# root.mainloop()
-# root.destroy()  # optional; see description below
-
 class PathSearcher:
     def __init__(self, adj_list):
         self.n = 10
@@ -225,17 +223,25 @@ class PathSearcher:
 
 
 if __name__ == '__main__':
-    adj_list = [[2, 4, 6],
-                [9],
-                [0, 3],
-                [2, 4],
-                [0, 3],
-                [],
-                [0, 7, 8],
-                [6, 8],
-                [6, 7],
-                [1]
-                ]
-    p = PathSearcher(adj_list=adj_list)
-    p.dfs(0,7)
-    p.print_pathways()
+    root = Tk()
+    canv = Canvas(root, width=30, height=30)
+    canv.pack()
+    app = MainView(root, minimal_distance=10)
+
+    root.mainloop()
+    root.destroy()  # optional; see description below
+
+    # adj_list = [[2, 4, 6],
+    #             [9],
+    #             [0, 3],
+    #             [2, 4],
+    #             [0, 3],
+    #             [],
+    #             [0, 7, 8],
+    #             [6, 8],
+    #             [6, 7],
+    #             [1]
+    #             ]
+    # p = PathSearcher(adj_list=adj_list)
+    # p.dfs(0,7)
+    # p.print_pathways()
