@@ -34,6 +34,7 @@ class MainView:
         self.f_color = 'green'
         self.t_color = 'red'
         self.node_radius = 15
+        self.achivable_radius = 150
         self.minimal_distance = minimal_distance
         self.mode = DrawingMode.NONE
         self.nodes = []
@@ -146,8 +147,21 @@ class MainView:
     def drawLine(self, x0, y0, x1, y1):
         self.canvas.create_line( x0, y0, x1, y1, fill='black')
 
+    def getAchivableNodes(self, current_node):
+        res = []
+        for node in self.nodes:
+            if node.id != current_node.id:
+                distance = sqrt((current_node.x - node.x) ** 2 + (current_node.y - node.y) ** 2)
+                if distance <= self.achivable_radius:
+                    res.append(node)
+        return res
+
     def generateEdges(self):
-        pass
+        self.achivable_radius = max(self.x_max - self.x_min, self.y_max - self.y_min)/2 # максимальное расстояние между узлами делим пополам.
+        for i in range(len(self.nodes)):                                                # это и есть радиус досигаемости
+            neighbours = self.getAchivableNodes(self.nodes[i])
+            for node in neighbours:
+                self.drawLine(self.nodes[i].x , self.nodes[i].y, node.x , node.y)
 
     def generateT(self):
         iter = 0
@@ -162,11 +176,7 @@ class MainView:
                     res = self.drawCircle(x, y, 'yellow', 't')
                     if iter > 1000: break
                     iter += 1
-        # генерация случайных связей в графе
-        for i in range(len(self.nodes)):
-            vertex_first = random.randint(0, len(self.nodes) - 1)
-            vertex_second = random.randint(0, len(self.nodes) - 1)
-            self.drawLine(self.nodes[vertex_first].x , self.nodes[vertex_first].y, self.nodes[vertex_second].x , self.nodes[vertex_second].y)
+        self.generateEdges()
 
     def onButtonClick(self, event):
         btn_name = str(event.widget).split('!')[2]
@@ -183,7 +193,7 @@ class MainView:
 root = Tk()
 canv = Canvas(root, width=30, height=30)
 canv.pack()
-app = MainView(root, minimal_distance=10)
+app = MainView(root, minimal_distance=15)
 
 root.mainloop()
 root.destroy()  # optional; see description below
