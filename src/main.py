@@ -66,6 +66,9 @@ class MainView:
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
         self.btn_t.pack(fill=X)
 
+        self.btn_path = Button(menu_frame, text="Определить кратчайшие пути")
+        self.btn_path.pack(fill=X)
+
         self.btn_clean = Button(menu_frame, text="Очистить поле")
         self.btn_clean.pack(fill=X)
 
@@ -80,6 +83,7 @@ class MainView:
         self.btn_t.bind('<Button-1>', self.onButtonClick)
         self.btn_f.bind('<Button-1>', self.onButtonClick)
         self.btn_clean.bind('<Button-1>', self.onButtonClick)
+        self.btn_path.bind('<Button-1>', self.onButtonClick)
 
     def isValidDistance(self, x, y):
         result = True
@@ -144,8 +148,8 @@ class MainView:
         return True
         # print(self.y_min,"  ",self.y_max)
 
-    def drawLine(self, x0, y0, x1, y1):
-        self.canvas.create_line(x0, y0, x1, y1, fill='black')
+    def drawLine(self, x0, y0, x1, y1, color='black', width=1.0):
+        self.canvas.create_line(x0, y0, x1, y1, fill=color, width=width)
 
     def getAchivableNodes(self, current_node):
         res = []
@@ -167,8 +171,6 @@ class MainView:
                 tmp_list.append(neighbour_node.id)
             self.adjacency_map.append(tmp_list.copy())
             tmp_list.clear()
-
-        print(self.adjacency_map)
 
     def generateT(self):
         iter = 0
@@ -194,12 +196,25 @@ class MainView:
         elif btn_name == 'button3':
             self.generateT()
         elif btn_name == 'button4':
+            self.createShortestPath()
+        elif btn_name == 'button5':
             self.cleanCanvas()
+
+    def createShortestPath(self):
+        for node in self.nodes:
+            if node.node_type == 'f':
+                p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
+                p.dfs(0, node.id)
+                pathways = p.pathways
+                for path in pathways:
+                    for i in range(len(path) - 1):
+                        self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
+                                      self.nodes[path[i + 1]].y, color='red', width=3.0)
 
 
 class PathSearcher:
-    def __init__(self, adj_list):
-        self.n = 10
+    def __init__(self, adj_list, n):
+        self.n = n
         self.visited = [False] * self.n  # массив "посещена ли вершина?"
         self.adj_list = adj_list
         self.tmp_path = []
@@ -218,8 +233,11 @@ class PathSearcher:
                 self.dfs(w, target_node)
         self.tmp_path.remove(curr_node)
 
-    def print_pathways(self):
+    def printPathways(self):
         print(self.pathways)
+
+    def getPathways(self):
+        return self.pathways.copy()
 
 
 if __name__ == '__main__':
@@ -230,18 +248,3 @@ if __name__ == '__main__':
 
     root.mainloop()
     root.destroy()  # optional; see description below
-
-    # adj_list = [[2, 4, 6],
-    #             [9],
-    #             [0, 3],
-    #             [2, 4],
-    #             [0, 3],
-    #             [],
-    #             [0, 7, 8],
-    #             [6, 8],
-    #             [6, 7],
-    #             [1]
-    #             ]
-    # p = PathSearcher(adj_list=adj_list)
-    # p.dfs(0,7)
-    # p.print_pathways()
