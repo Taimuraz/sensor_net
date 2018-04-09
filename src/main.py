@@ -43,7 +43,7 @@ class MainView:
         self.x_max = 0
         self.y_min = 10000
         self.y_max = 0
-        self.adjacency_map = dict()  # список смежности графа.
+        self.adjacency_map = dict()  # словарь смежности графа.
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -145,7 +145,7 @@ class MainView:
         # print(self.y_min,"  ",self.y_max)
 
     def drawLine(self, x0, y0, x1, y1):
-        self.canvas.create_line( x0, y0, x1, y1, fill='black')
+        self.canvas.create_line(x0, y0, x1, y1, fill='black')
 
     def getAchivableNodes(self, current_node):
         res = []
@@ -157,11 +157,12 @@ class MainView:
         return res
 
     def generateEdges(self):
-        self.achivable_radius = max(self.x_max - self.x_min, self.y_max - self.y_min)/2 # максимальное расстояние между узлами делим пополам.
-        for i in range(len(self.nodes)):                                                # это и есть радиус досигаемости
+        self.achivable_radius = max(self.x_max - self.x_min,
+                                    self.y_max - self.y_min) / 2  # максимальное расстояние между узлами делим пополам.
+        for i in range(len(self.nodes)):  # это и есть радиус досигаемости
             neighbours = self.getAchivableNodes(self.nodes[i])
             for node in neighbours:
-                self.drawLine(self.nodes[i].x , self.nodes[i].y, node.x , node.y)
+                self.drawLine(self.nodes[i].x, self.nodes[i].y, node.x, node.y)
 
     def generateT(self):
         iter = 0
@@ -190,10 +191,51 @@ class MainView:
             self.cleanCanvas()
 
 
-root = Tk()
-canv = Canvas(root, width=30, height=30)
-canv.pack()
-app = MainView(root, minimal_distance=15)
+# root = Tk()
+# canv = Canvas(root, width=30, height=30)
+# canv.pack()
+# app = MainView(root, minimal_distance=15)
+#
+# root.mainloop()
+# root.destroy()  # optional; see description below
 
-root.mainloop()
-root.destroy()  # optional; see description below
+class PathSearcher:
+    def __init__(self, adj_list):
+        self.n = 10
+        self.visited = [False] * self.n  # массив "посещена ли вершина?"
+        self.adj_list = adj_list
+        self.tmp_path = []
+        self.pathways = []
+
+    def dfs(self, curr_node, target_node):
+        if curr_node != target_node:
+            self.visited[curr_node] = True
+        self.tmp_path.append(curr_node)
+        if curr_node == target_node:
+            self.pathways.append(self.tmp_path.copy())
+
+        for w in self.adj_list[curr_node]:
+            if not self.visited[w]:  # посещён ли текущий сосед?
+                self.dfs(w, target_node)
+        # print(self.tmp_path, " ", target_node)
+        self.tmp_path.remove(curr_node)
+
+    def print_pathways(self):
+        print(self.pathways)
+
+
+if __name__ == '__main__':
+    adj_list = [[2, 4, 6],
+                [9],
+                [0, 3],
+                [2, 4],
+                [0, 3],
+                [],
+                [0, 7, 8],
+                [6],
+                [6],
+                [1]
+                ]
+    p = PathSearcher(adj_list=adj_list)
+    p.dfs(0,4)
+    p.print_pathways()
