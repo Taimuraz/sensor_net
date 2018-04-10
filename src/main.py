@@ -66,6 +66,13 @@ class MainView:
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
         self.btn_t.pack(fill=X)
 
+        self.label_time = Label(menu_frame, text="Время передачи сообщения")
+        self.label_time.pack(fill=X)
+
+        self.entry_time = Entry(menu_frame)
+        self.entry_time.insert(0, '4')
+        self.entry_time.pack(fill=X)
+
         self.btn_path = Button(menu_frame, text="Определить кратчайшие пути")
         self.btn_path.pack(fill=X)
 
@@ -75,7 +82,7 @@ class MainView:
         self.btn_exit = Button(menu_frame, text="Выход", fg="red", command=menu_frame.quit)
         self.btn_exit.pack(fill=X)
 
-        self.canvas = Canvas(master, height=height)
+        self.canvas = Canvas(master, height=height, background='white')
         self.canvas.pack(fill=X)
 
         self.canvas.bind('<Button-1>', self.onCanvasClick)
@@ -200,12 +207,18 @@ class MainView:
         elif btn_name == 'button5':
             self.cleanCanvas()
 
+    # def getMinimalPath(self, pathways):
+    #     min = 1000
+    #     for path in pathways:
+    #         if len(path)
+
     def createShortestPath(self):
         for node in self.nodes:
             if node.node_type == 'f':
                 p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
                 p.dfs(0, node.id)
                 pathways = p.pathways
+
                 for path in pathways:
                     for i in range(len(path) - 1):
                         self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
