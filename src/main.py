@@ -44,6 +44,7 @@ class MainView:
         self.y_min = 10000
         self.y_max = 0
         self.adjacency_map = []  # словарь смежности графа.
+        self.message_time = 0 # время передачи сообщения
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -145,8 +146,9 @@ class MainView:
         if make_step:
             if self.isValidDistance(x, y):
                 self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
-                self.node_id += 1
                 self.defineBounds(x, y)
+                self.canvas.create_text(x + self.node_radius, y-self.node_radius, text=str(self.node_id))
+                self.node_id += 1
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                         [x + self.node_radius, y + self.node_radius],
                                         fill=node_color)
@@ -207,18 +209,22 @@ class MainView:
         elif btn_name == 'button5':
             self.cleanCanvas()
 
-    # def getMinimalPath(self, pathways):
-    #     min = 1000
-    #     for path in pathways:
-    #         if len(path)
+    def getMinimalPath(self, pathways):
+        min = 1000
+        result = []
+        for path in pathways:
+            if len(path) < min:
+                min = len(path)
+                result = path
+        return result
 
     def createShortestPath(self):
+        self.message_time = int(self.entry_time.get())
         for node in self.nodes:
             if node.node_type == 'f':
                 p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
                 p.dfs(0, node.id)
-                pathways = p.pathways
-
+                pathways = p.getPathways()
                 for path in pathways:
                     for i in range(len(path) - 1):
                         self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
