@@ -44,7 +44,7 @@ class MainView:
         self.y_min = 10000
         self.y_max = 0
         self.adjacency_map = []  # словарь смежности графа.
-        self.message_time = 0 # время передачи сообщения
+        self.message_time = 0  # время передачи сообщения
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -61,7 +61,7 @@ class MainView:
         self.label_wdgt.pack(fill=X)
 
         self.entry_widg = Entry(menu_frame)
-        self.entry_widg.insert(0, '9')
+        self.entry_widg.insert(0, '3')
         self.entry_widg.pack(fill=X)
 
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
@@ -147,7 +147,7 @@ class MainView:
             if self.isValidDistance(x, y):
                 self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
                 self.defineBounds(x, y)
-                self.canvas.create_text(x + self.node_radius, y-self.node_radius, text=str(self.node_id))
+                self.canvas.create_text(x + self.node_radius, y - self.node_radius, text=str(self.node_id))
                 self.node_id += 1
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                         [x + self.node_radius, y + self.node_radius],
@@ -205,7 +205,7 @@ class MainView:
         elif btn_name == 'button3':
             self.generateT()
         elif btn_name == 'button4':
-            self.createShortestPath()
+            self.createPathways()
         elif btn_name == 'button5':
             self.cleanCanvas()
 
@@ -218,52 +218,93 @@ class MainView:
                 result = path
         return result
 
-    def createShortestPath(self):
+    def createPathways(self):
         self.message_time = int(self.entry_time.get())
+        bs_node = self.nodes[0]
+        f_nodes = []
         for node in self.nodes:
             if node.node_type == 'f':
-                p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
-                p.dfs(0, node.id)
-                pathways = p.getPathways()
-                for path in pathways:
-                    for i in range(len(path) - 1):
-                        self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
-                                      self.nodes[path[i + 1]].y, color='red', width=3.0)
+                f_nodes.append(node)
+
+        # search path ==========================
+        for f_node in f_nodes:
+            p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
+            p.dfs(bs_node.id, f_node.id)
+            pathways = p.getPathways()
+            print("id = ", f_node.id, "================================= ")
+            for path in pathways:
+                print(path)
+            # for path in pathways:
+            #     for i in range(len(path) - 1):
+            #         self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
+            #                       self.nodes[path[i + 1]].y, color='red', width=3.0)
 
 
 class PathSearcher:
-    def __init__(self, adj_list, n):
-        self.n = n
-        self.visited = [False] * self.n  # массив "посещена ли вершина?"
+    def __init__(self, adj_list, start_node, target_node):
         self.adj_list = adj_list
-        self.tmp_path = []
+        self.start_node = start_node
+        self.target_node = target_node
+        self.visited = [False] * len(self.adj_list)
+        self.level = [-1] * len(self.adj_list) # уровни вершин
         self.pathways = []
+        self.path = []
 
-    def dfs(self, curr_node, target_node):
-        self.tmp_path.append(curr_node)
-        if curr_node != target_node:
-            self.visited[curr_node] = True
-        if curr_node == target_node:
-            self.pathways.append(self.tmp_path.copy())
-            self.tmp_path.remove(curr_node)
-            return
-        for w in self.adj_list[curr_node]:
-            if not self.visited[w]:  # посещён ли текущий сосед?
-                self.dfs(w, target_node)
-        self.tmp_path.remove(curr_node)
+    def bfs(self):
+        queue = [self.start_node]
+        self.level[self.start_node] = 0
+        while queue:
+            curr_node = queue.pop(0)
+            for child_node in self.adj_list[curr_node]:
+                if self.level[child_node] == -1:
+                    queue.append(child_node)
+                    self.level[child_node] = self.level[curr_node] + 1
+        print(self.level)
 
-    def printPathways(self):
-        print(self.pathways)
+    def getAllPathways(self, curr_node):
+        self.visited[curr_node] = True
+        self.path.append(curr_node)
 
-    def getPathways(self):
-        return self.pathways.copy()
+        if curr_node == self.target_node:
+            self.pathways.append(self.path.copy())
+        else:
+            for node in self.adj_list[curr_node]:
+                if not self.visited[node]:
+                    self.getAllPathways(node)
+        self.visited[curr_node] = False
+        self.path.pop()
 
+    def getMinimalPathways(self):
+        self.getAllPathways(self.start_node)
 
 if __name__ == '__main__':
-    root = Tk()
-    canv = Canvas(root, width=30, height=30)
-    canv.pack()
-    app = MainView(root, minimal_distance=10)
+    adj = [
+        # список смежности
+        [1, 3, 5],  # 0
+        [0, 4, 5],  # 1
+        [4, 5],  # 2
+        [0, 4, 5],  # 3
+        [1, 2, 3],  # 4
+        [0, 1, 2, 3]  # 5
+    ]
 
-    root.mainloop()
-    root.destroy()  # optional; see description below
+    p = PathSearcher(adj_list=adj, start_node=0, target_node=5)
+    p.getMinimalPathways()
+
+    # root = Tk()
+    # canv = Canvas(root, width=30, height=30)
+    # canv.pack()
+    # app = MainView(root, minimal_distance=10)
+    #
+    # # test purposes
+    # app.drawCircle(150, 200, 'blue', 'bs')
+    # app.drawCircle(200, 300, 'green', 'f')
+    # app.drawCircle(500, 300, 'green', 'f')
+    # app.drawCircle(400, 100, 'green', 'f')
+    # app.generateT()
+    # # for node in app.adjacency_map:
+    # #     print(node)
+    # app.createPathways()
+    #
+    # root.mainloop()
+    # root.destroy()  # optional; see description below
