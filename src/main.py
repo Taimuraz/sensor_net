@@ -228,16 +228,17 @@ class MainView:
 
         # search path ==========================
         for f_node in f_nodes:
-            p = PathSearcher(adj_list=self.adjacency_map, n=len(self.nodes))
-            p.dfs(bs_node.id, f_node.id)
-            pathways = p.getPathways()
+            p = PathSearcher(adj_list=self.adjacency_map, start_node=bs_node, target_node=f_node)
+            p.dfs()
+            pathways = p.getMinimalPathways()
             print("id = ", f_node.id, "================================= ")
             for path in pathways:
                 print(path)
-            # for path in pathways:
-            #     for i in range(len(path) - 1):
-            #         self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
-            #                       self.nodes[path[i + 1]].y, color='red', width=3.0)
+            # ====================== draw minimal pathways
+            for path in pathways:
+                for i in range(len(path) - 1):
+                    self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
+                                  self.nodes[path[i + 1]].y, color='red', width=3.0)
 
 
 class PathSearcher:
@@ -250,7 +251,7 @@ class PathSearcher:
         self.pathways = []
         self.path = []
 
-    def bfs(self):
+    def dfs(self):
         queue = [self.start_node]
         self.level[self.start_node] = 0
         while queue:
@@ -276,35 +277,36 @@ class PathSearcher:
 
     def getMinimalPathways(self):
         self.getAllPathways(self.start_node)
+        return self.pathways
 
 if __name__ == '__main__':
-    adj = [
-        # список смежности
-        [1, 3, 5],  # 0
-        [0, 4, 5],  # 1
-        [4, 5],  # 2
-        [0, 4, 5],  # 3
-        [1, 2, 3],  # 4
-        [0, 1, 2, 3]  # 5
-    ]
-
-    p = PathSearcher(adj_list=adj, start_node=0, target_node=5)
-    p.getMinimalPathways()
-
-    # root = Tk()
-    # canv = Canvas(root, width=30, height=30)
-    # canv.pack()
-    # app = MainView(root, minimal_distance=10)
+    # adj = [
+    #     # список смежности
+    #     [1, 3, 5],  # 0
+    #     [0, 4, 5],  # 1
+    #     [4, 5],  # 2
+    #     [0, 4, 5],  # 3
+    #     [1, 2, 3],  # 4
+    #     [0, 1, 2, 3]  # 5
+    # ]
     #
-    # # test purposes
-    # app.drawCircle(150, 200, 'blue', 'bs')
-    # app.drawCircle(200, 300, 'green', 'f')
-    # app.drawCircle(500, 300, 'green', 'f')
-    # app.drawCircle(400, 100, 'green', 'f')
-    # app.generateT()
-    # # for node in app.adjacency_map:
-    # #     print(node)
-    # app.createPathways()
-    #
-    # root.mainloop()
-    # root.destroy()  # optional; see description below
+    # p = PathSearcher(adj_list=adj, start_node=0, target_node=5)
+    # p.getMinimalPathways()
+
+    root = Tk()
+    canv = Canvas(root, width=30, height=30)
+    canv.pack()
+    app = MainView(root, minimal_distance=10)
+
+    # test purposes
+    app.drawCircle(150, 200, 'blue', 'bs')
+    app.drawCircle(200, 300, 'green', 'f')
+    app.drawCircle(500, 300, 'green', 'f')
+    app.drawCircle(400, 100, 'green', 'f')
+    app.generateT()
+    # for node in app.adjacency_map:
+    #     print(node)
+    app.createPathways()
+
+    root.mainloop()
+    root.destroy()  # optional; see description below
