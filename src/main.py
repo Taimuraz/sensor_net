@@ -61,7 +61,7 @@ class MainView:
         self.label_wdgt.pack(fill=X)
 
         self.entry_widg = Entry(menu_frame)
-        self.entry_widg.insert(0, '3')
+        self.entry_widg.insert(0, '4')
         self.entry_widg.pack(fill=X)
 
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
@@ -71,7 +71,7 @@ class MainView:
         self.label_time.pack(fill=X)
 
         self.entry_time = Entry(menu_frame)
-        self.entry_time.insert(0, '4')
+        self.entry_time.insert(0, '3')
         self.entry_time.pack(fill=X)
 
         self.btn_path = Button(menu_frame, text="Определить кратчайшие пути")
@@ -228,9 +228,8 @@ class MainView:
 
         # search path ==========================
         for f_node in f_nodes:
-            p = PathSearcher(adj_list=self.adjacency_map, start_node=bs_node, target_node=f_node)
-            p.dfs()
-            pathways = p.getMinimalPathways()
+            p = PathSearcher(adj_list=self.adjacency_map, start_node=bs_node.id, target_node=f_node.id)
+            pathways = p.getMinimalPathways(max_path_length=self.message_time)
             print("id = ", f_node.id, "================================= ")
             for path in pathways:
                 print(path)
@@ -251,16 +250,6 @@ class PathSearcher:
         self.pathways = []
         self.path = []
 
-    def dfs(self):
-        queue = [self.start_node]
-        self.level[self.start_node] = 0
-        while queue:
-            curr_node = queue.pop(0)
-            for child_node in self.adj_list[curr_node]:
-                if self.level[child_node] == -1:
-                    queue.append(child_node)
-                    self.level[child_node] = self.level[curr_node] + 1
-        print(self.level)
 
     def getAllPathways(self, curr_node):
         self.visited[curr_node] = True
@@ -275,9 +264,14 @@ class PathSearcher:
         self.visited[curr_node] = False
         self.path.pop()
 
-    def getMinimalPathways(self):
+    def getMinimalPathways(self, max_path_length):
+        result = []
         self.getAllPathways(self.start_node)
-        return self.pathways
+
+        for path in self.pathways:
+           if len(path) - 1 <= max_path_length:
+               result.append(path)
+        return result
 
 if __name__ == '__main__':
     # adj = [
@@ -298,15 +292,15 @@ if __name__ == '__main__':
     canv.pack()
     app = MainView(root, minimal_distance=10)
 
-    # test purposes
-    app.drawCircle(150, 200, 'blue', 'bs')
-    app.drawCircle(200, 300, 'green', 'f')
-    app.drawCircle(500, 300, 'green', 'f')
-    app.drawCircle(400, 100, 'green', 'f')
-    app.generateT()
-    # for node in app.adjacency_map:
-    #     print(node)
-    app.createPathways()
+    # # test purposes
+    # app.drawCircle(150, 200, 'blue', 'bs')
+    # app.drawCircle(200, 300, 'green', 'f')
+    # app.drawCircle(500, 300, 'green', 'f')
+    # app.drawCircle(400, 100, 'green', 'f')
+    # app.generateT()
+    # # for node in app.adjacency_map:
+    # #     print(node)
+    # app.createPathways()
 
     root.mainloop()
     root.destroy()  # optional; see description below
