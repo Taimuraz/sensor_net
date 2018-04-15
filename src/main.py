@@ -16,12 +16,16 @@ class Node:
     x = 0
     y = 0
     node_type = 'bs'
+    node_color = ''
+    node_text = ''
 
-    def __init__(self, id=0, x=0, y=0, node_type='bs'):
+    def __init__(self, id=0, x=0, y=0, node_type='bs', node_color = '', node_text=''):
         self.x = x
         self.y = y
         self.id = id
         self.node_type = node_type
+        self.node_text = node_text
+        self.node_color = node_color
 
     def __repr__(self):
         return 'id={} x={}, y={}, type={}'.format(self.id, self.x, self.y, self.node_type)
@@ -119,7 +123,8 @@ class MainView:
         x = event.x
         y = event.y
         if self.mode == DrawingMode.BS:
-            self.drawNode(x, y, self.bs_color, 'bs')
+            if not self.isBsAdded():
+                self.drawNode(x, y, self.bs_color, 'bs')
         elif self.mode == DrawingMode.F:
             self.drawNode(x, y, self.f_color, 'f')
 
@@ -135,32 +140,31 @@ class MainView:
 
     def drawNode(self, x, y, node_color, node_type):
         node_text = ""
-        make_step = True
-        if node_type == 'bs':
-            if self.isBsAdded():
-                make_step = False
+        if self.isValidDistance(x, y):
+            self.defineBounds(x, y)
 
-        if make_step:
-            if self.isValidDistance(x, y):
-                self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
-                self.defineBounds(x, y)
-                if node_type == 'bs':
-                    node_text = "БС"
-                if node_type == 'f':
-                    node_text = "Ф"
-                    node_text = node_text + str(self.node_id)
+            if node_type == 'bs':
+                node_text = "БС"
 
-                if node_type == 't':
-                    node_text = "T"
-                    node_text = node_text + str(self.node_id)
+            if node_type == 'f':
+                node_text = "Ф"
+                node_text = node_text + str(self.node_id)
 
-                self.canvas.create_text(x + self.node_radius + 5, y - self.node_radius, text=node_text)
-                self.node_id += 1
-                self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
-                                        [x + self.node_radius, y + self.node_radius],
-                                        fill=node_color)
-            else:
-                return False
+            if node_type == 't':
+                node_text = "T"
+                node_text = node_text + str(self.node_id)
+
+            self.nodes.append(
+                Node(id=self.node_id, x=x, y=y, node_type=node_type, node_color=node_color, node_text=node_text))
+
+            self.canvas.create_text(x + self.node_radius + 5, y - self.node_radius, text=node_text)
+            self.node_id += 1
+            self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
+                                    [x + self.node_radius, y + self.node_radius],
+                                    fill=node_color)
+        else:
+            return False
+
         return True
         # print(self.y_min,"  ",self.y_max)
 
@@ -216,15 +220,6 @@ class MainView:
         elif btn_name == 'button5':
             self.cleanCanvas()
 
-    def getMinimalPath(self, pathways):
-        min = 1000
-        result = []
-        for path in pathways:
-            if len(path) < min:
-                min = len(path)
-                result = path
-        return result
-
     def getAllFNodes(self):
         f_nodes = []
         for node in self.nodes:
@@ -232,25 +227,33 @@ class MainView:
                 f_nodes.append(node)
         return f_nodes
 
+    def drawMinimalPathWays(self, pathways):
+        for path in pathways:
+            for i in range(len(path) - 1):
+                self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
+                              self.nodes[path[i + 1]].y, color='red', width=3.0)
+
+    def reDrawField(self, pathways):
+        self.canvas.delete('all')
+        for node in self.nodes:
+            self.canvas.create_text(node.x + self.node_radius + 5, node.y - self.node_radius, text=node.node_text)
+            self.canvas.create_oval([node.x - self.node_radius, node.y - self.node_radius],
+                                    [node.x + self.node_radius, node.y + self.node_radius],
+                                    fill=node.node_color)
+
+
+        self.drawMinimalPathWays(pathways)  # draw all minimal pathways
+
     def createPathways(self):
         self.message_time = int(self.entry_time.get())
         bs_node = self.nodes[0]
-
         f_nodes = self.getAllFNodes()  # getting f nodes.
-
         # search path ==========================
         p = PathSearcher(adj_list=self.adjacency_map)
         for f_node in f_nodes:
             pathways = p.getMinimalPathways(max_path_length=self.message_time, start_node=bs_node.id,
                                             target_node=f_node.id)
-            print("id = ", f_node.id, "================================= ")
-            for path in pathways:
-                print(path)
-            # ====================== draw minimal pathways
-            for path in pathways:
-                for i in range(len(path) - 1):
-                    self.drawLine(self.nodes[path[i]].x, self.nodes[path[i]].y, self.nodes[path[i + 1]].x,
-                                  self.nodes[path[i + 1]].y, color='red', width=3.0)
+            self.reDrawField(pathways=pathways)
 
 
 class PathSearcher:
