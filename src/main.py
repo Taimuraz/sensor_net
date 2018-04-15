@@ -130,6 +130,8 @@ class MainView:
         self.x_max = 0
         self.y_min = 10000
         self.y_max = 0
+        self.node_id = 0
+        del self.adjacency_map[:]
 
     def drawNode(self, x, y, node_color, node_type):
         node_text = ""
