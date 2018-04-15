@@ -119,15 +119,9 @@ class MainView:
         x = event.x
         y = event.y
         if self.mode == DrawingMode.BS:
-            self.drawCircle(x, y, self.bs_color, 'bs')
+            self.drawNode(x, y, self.bs_color, 'bs')
         elif self.mode == DrawingMode.F:
-            self.drawCircle(x, y, self.f_color, 'f')
-
-    def btnRelief(self, btn):
-        if btn['relief'] == 'raised':
-            btn['relief'] = SUNKEN
-        else:
-            btn['relief'] = RAISED
+            self.drawNode(x, y, self.f_color, 'f')
 
     def cleanCanvas(self):
         self.canvas.delete('all')
@@ -137,7 +131,8 @@ class MainView:
         self.y_min = 10000
         self.y_max = 0
 
-    def drawCircle(self, x, y, node_color, node_type):
+    def drawNode(self, x, y, node_color, node_type):
+        node_text = ""
         make_step = True
         if node_type == 'bs':
             if self.isBsAdded():
@@ -147,7 +142,17 @@ class MainView:
             if self.isValidDistance(x, y):
                 self.nodes.append(Node(id=self.node_id, x=x, y=y, node_type=node_type))
                 self.defineBounds(x, y)
-                self.canvas.create_text(x + self.node_radius, y - self.node_radius, text=str(self.node_id))
+                if node_type == 'bs':
+                    node_text = "БС"
+                if node_type == 'f':
+                    node_text = "Ф"
+                    node_text = node_text + str(self.node_id)
+
+                if node_type == 't':
+                    node_text = "T"
+                    node_text = node_text + str(self.node_id)
+
+                self.canvas.create_text(x + self.node_radius + 5, y - self.node_radius, text=node_text)
                 self.node_id += 1
                 self.canvas.create_oval([x - self.node_radius, y - self.node_radius],
                                         [x + self.node_radius, y + self.node_radius],
@@ -186,12 +191,12 @@ class MainView:
         for i in range(int(self.entry_widg.get())):
             x = random.uniform(self.x_min, self.x_max)
             y = random.uniform(self.y_min, self.y_max)
-            res = self.drawCircle(x, y, 'yellow', 't')
+            res = self.drawNode(x, y, 'yellow', 't')
             if res == False:
                 while res != True:
                     x = random.uniform(self.x_min, self.x_max)
                     y = random.uniform(self.y_min, self.y_max)
-                    res = self.drawCircle(x, y, 'yellow', 't')
+                    res = self.drawNode(x, y, 'yellow', 't')
                     if iter > 1000: break
                     iter += 1
         self.generateEdges()
@@ -218,18 +223,24 @@ class MainView:
                 result = path
         return result
 
-    def createPathways(self):
-        self.message_time = int(self.entry_time.get())
-        bs_node = self.nodes[0]
+    def getAllFNodes(self):
         f_nodes = []
         for node in self.nodes:
             if node.node_type == 'f':
                 f_nodes.append(node)
+        return f_nodes
+
+    def createPathways(self):
+        self.message_time = int(self.entry_time.get())
+        bs_node = self.nodes[0]
+
+        f_nodes = self.getAllFNodes()  # getting f nodes.
 
         # search path ==========================
+        p = PathSearcher(adj_list=self.adjacency_map)
         for f_node in f_nodes:
-            p = PathSearcher(adj_list=self.adjacency_map, start_node=bs_node.id, target_node=f_node.id)
-            pathways = p.getMinimalPathways(max_path_length=self.message_time)
+            pathways = p.getMinimalPathways(max_path_length=self.message_time, start_node=bs_node.id,
+                                            target_node=f_node.id)
             print("id = ", f_node.id, "================================= ")
             for path in pathways:
                 print(path)
@@ -241,15 +252,14 @@ class MainView:
 
 
 class PathSearcher:
-    def __init__(self, adj_list, start_node, target_node):
+    def __init__(self, adj_list):
         self.adj_list = adj_list
-        self.start_node = start_node
-        self.target_node = target_node
+        self.start_node = 0
+        self.target_node = 0
         self.visited = [False] * len(self.adj_list)
-        self.level = [-1] * len(self.adj_list) # уровни вершин
+        self.level = [-1] * len(self.adj_list)  # уровни вершин
         self.pathways = []
         self.path = []
-
 
     def getAllPathways(self, curr_node):
         self.visited[curr_node] = True
@@ -264,39 +274,30 @@ class PathSearcher:
         self.visited[curr_node] = False
         self.path.pop()
 
-    def getMinimalPathways(self, max_path_length):
+    def getMinimalPathways(self, max_path_length, start_node, target_node):
         result = []
+        self.start_node = start_node
+        self.target_node = target_node
+
         self.getAllPathways(self.start_node)
 
         for path in self.pathways:
-           if len(path) - 1 <= max_path_length:
-               result.append(path)
+            if len(path) - 1 <= max_path_length:
+                result.append(path)
         return result
 
-if __name__ == '__main__':
-    # adj = [
-    #     # список смежности
-    #     [1, 3, 5],  # 0
-    #     [0, 4, 5],  # 1
-    #     [4, 5],  # 2
-    #     [0, 4, 5],  # 3
-    #     [1, 2, 3],  # 4
-    #     [0, 1, 2, 3]  # 5
-    # ]
-    #
-    # p = PathSearcher(adj_list=adj, start_node=0, target_node=5)
-    # p.getMinimalPathways()
 
+if __name__ == '__main__':
     root = Tk()
     canv = Canvas(root, width=30, height=30)
     canv.pack()
     app = MainView(root, minimal_distance=10)
 
     # # test purposes
-    # app.drawCircle(150, 200, 'blue', 'bs')
-    # app.drawCircle(200, 300, 'green', 'f')
-    # app.drawCircle(500, 300, 'green', 'f')
-    # app.drawCircle(400, 100, 'green', 'f')
+    # app.drawNode(150, 200, 'blue', 'bs')
+    # app.drawNode(200, 300, 'green', 'f')
+    # app.drawNode(500, 300, 'green', 'f')
+    # app.drawNode(400, 100, 'green', 'f')
     # app.generateT()
     # # for node in app.adjacency_map:
     # #     print(node)
