@@ -63,24 +63,33 @@ class MainView:
 
         self.label_wdgt = Label(menu_frame, text="Число T узлов")
         self.label_wdgt.pack(fill=X)
-
         self.entry_widg = Entry(menu_frame)
         self.entry_widg.insert(0, '4')
         self.entry_widg.pack(fill=X)
 
-        self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
-        self.btn_t.pack(fill=X)
-
         self.label_time = Label(menu_frame, text="Время передачи сообщения")
         self.label_time.pack(fill=X)
-
         self.entry_time = Entry(menu_frame)
         self.entry_time.insert(0, '3')
         self.entry_time.pack(fill=X)
 
+        self.label_connectivity = Label(menu_frame, text="p работ-ти T узлов")
+        self.label_connectivity.pack(fill=X)
+        self.entry_connectivity = Entry(menu_frame)
+        self.entry_connectivity.insert(0, '0.3')
+        self.entry_connectivity.pack(fill=X)
+
+        self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
+        self.btn_t.pack(fill=X)
+
         self.btn_path = Button(menu_frame, text="Определить кратчайшие пути")
         self.btn_path.pack(fill=X)
 
+        self.btn_connectivity = Button(menu_frame, text="Оценить связность маршрутов")
+        self.btn_connectivity.pack(fill=X)
+
+
+        # ======================================================================================
         self.btn_clean = Button(menu_frame, text="Очистить поле")
         self.btn_clean.pack(fill=X)
 
