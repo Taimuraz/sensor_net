@@ -240,6 +240,8 @@ class MainView:
             self.canvas.create_oval([node.x - self.node_radius, node.y - self.node_radius],
                                     [node.x + self.node_radius, node.y + self.node_radius],
                                     fill=node.node_color)
+            for neighbour in self.adjacency_map[node.id]:
+                self.drawLine(self.nodes[node.id].x, self.nodes[node.id].y, self.nodes[neighbour].x, self.nodes[neighbour].y )
 
 
         self.drawMinimalPathWays(pathways)  # draw all minimal pathways
