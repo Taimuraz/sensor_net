@@ -119,6 +119,8 @@ class MainView:
                 for path in self.minimalPathways: # all optimal pathways
                     if path[-1] == node.id:       # that belongs to vertex
                         tmp += 1 - (len(path) - 2) * probability
+                self.canvas.create_text(node.x + self.node_radius + 8, node.y + self.node_radius + 5,
+                                        text="P=" + str(round(1 - tmp, 5)))
                 f_connectivity[node.id] = 1 - tmp
                 tmp = 0
 
