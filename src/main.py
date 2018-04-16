@@ -2,7 +2,7 @@ from tkinter import *
 from enum import Enum
 from math import sqrt
 import random
-
+from tkinter import messagebox
 
 class DrawingMode(Enum):
     NONE = 0
@@ -50,6 +50,8 @@ class MainView:
         self.adjacency_map = []  # словарь смежности графа.
         self.message_time = 0  # время передачи сообщения
         self.minimalPathways = dict()
+        self.f_connectivity = dict()
+
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -80,6 +82,14 @@ class MainView:
         self.entry_connectivity.insert(0, '0.3')
         self.entry_connectivity.pack(fill=X)
 
+        self.label_probability = Label(menu_frame, text="Вероятность связности.")
+        self.label_probability.pack(fill=X)
+        self.entry_probability = Entry(menu_frame)
+        self.entry_probability.insert(0, '0.3')
+        self.entry_probability.pack(fill=X)
+
+
+
         self.btn_t = Button(menu_frame, text="Сгенерировать Т узлы")
         self.btn_t.pack(fill=X)
 
@@ -88,6 +98,9 @@ class MainView:
 
         self.btn_connectivity = Button(menu_frame, text="Оценить связность маршрутов")
         self.btn_connectivity.pack(fill=X)
+
+        self.btn_probability = Button(menu_frame, text="Сравнить оценки связности")
+        self.btn_probability.pack(fill=X)
 
 
         # ======================================================================================
@@ -107,12 +120,22 @@ class MainView:
         self.btn_clean.bind('<Button-1>', self.onButtonClick)
         self.btn_path.bind('<Button-1>', self.onButtonClick)
         self.btn_connectivity.bind('<Button-1>', self.connectivityAssesment)
+        self.btn_probability.bind('<Button-1>', self.compareConnectivity)
 
 
+    def compareConnectivity(self, event):
+        res = True
+        gain = float(self.entry_probability.get())
+        for key in self.f_connectivity.keys():
+            if self.f_connectivity[key] > gain:
+                res = False
+
+        if res:
+            messagebox.showinfo("SensorNet", "Построена структура сенсорной сети с требуемой отказоустойчивостью.")
 
     def connectivityAssesment(self, event):
         probability = float(self.entry_connectivity.get())
-        f_connectivity = dict()
+
         tmp = 0
         for node in self.nodes:
             if node.node_type == 'f':
@@ -121,10 +144,8 @@ class MainView:
                         tmp += 1 - (len(path) - 2) * probability
                 self.canvas.create_text(node.x + self.node_radius + 8, node.y + self.node_radius + 5,
                                         text="P=" + str(round(1 - tmp, 5)))
-                f_connectivity[node.id] = 1 - tmp
+                self.f_connectivity[node.id] = 1 - tmp
                 tmp = 0
-
-        print(f_connectivity)
 
     def isValidDistance(self, x, y):
         result = True
