@@ -49,6 +49,7 @@ class MainView:
         self.y_max = 0
         self.adjacency_map = []  # словарь смежности графа.
         self.message_time = 0  # время передачи сообщения
+        self.minimalPathways = dict()
 
         master.resizable(width=False, height=False)
         master.geometry('{}x{}'.format(width, height))
@@ -105,6 +106,23 @@ class MainView:
         self.btn_f.bind('<Button-1>', self.onButtonClick)
         self.btn_clean.bind('<Button-1>', self.onButtonClick)
         self.btn_path.bind('<Button-1>', self.onButtonClick)
+        self.btn_connectivity.bind('<Button-1>', self.connectivityAssesment)
+
+
+
+    def connectivityAssesment(self, event):
+        probability = float(self.entry_connectivity.get())
+        f_connectivity = dict()
+        tmp = 0
+        for node in self.nodes:
+            if node.node_type == 'f':
+                for path in self.minimalPathways: # all optimal pathways
+                    if path[-1] == node.id:       # that belongs to vertex
+                        tmp += 1 - (len(path) - 2) * probability
+                f_connectivity[node.id] = 1 - tmp
+                tmp = 0
+
+        print(f_connectivity)
 
     def isValidDistance(self, x, y):
         result = True
@@ -226,7 +244,7 @@ class MainView:
             self.generateT()
         elif btn_name == 'button4':
             self.createPathways()
-        elif btn_name == 'button5':
+        elif btn_name == 'button6':
             self.cleanCanvas()
 
     def getAllFNodes(self):
@@ -262,9 +280,10 @@ class MainView:
         # search path ==========================
         p = PathSearcher(adj_list=self.adjacency_map)
         for f_node in f_nodes:
-            pathways = p.getMinimalPathways(max_path_length=self.message_time, start_node=bs_node.id,
-                                            target_node=f_node.id)
-            self.reDrawField(pathways=pathways)
+            pathways = p.getMinimalPathways(max_path_length=self.message_time, start_node=bs_node.id, target_node=f_node.id)
+
+        self.minimalPathways = pathways
+        self.reDrawField(pathways=pathways)
 
 
 class PathSearcher:
@@ -310,14 +329,14 @@ if __name__ == '__main__':
     app = MainView(root, minimal_distance=10)
 
     # # test purposes
-    # app.drawNode(150, 200, 'blue', 'bs')
-    # app.drawNode(200, 300, 'green', 'f')
-    # app.drawNode(500, 300, 'green', 'f')
-    # app.drawNode(400, 100, 'green', 'f')
-    # app.generateT()
-    # # for node in app.adjacency_map:
-    # #     print(node)
-    # app.createPathways()
+    app.drawNode(150, 200, 'blue', 'bs')
+    app.drawNode(200, 300, 'green', 'f')
+    app.drawNode(500, 300, 'green', 'f')
+    app.drawNode(400, 100, 'green', 'f')
+    app.generateT()
+    # for node in app.adjacency_map:
+    #     print(node)
+    app.createPathways()
 
     root.mainloop()
     root.destroy()  # optional; see description below
