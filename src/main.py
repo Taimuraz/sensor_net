@@ -133,6 +133,7 @@ class MainView:
         if res:
             messagebox.showinfo("SensorNet", "Построена структура сенсорной сети с требуемой отказоустойчивостью.")
 
+
     def connectivityAssesment(self, event):
         probability = float(self.entry_connectivity.get())
 
@@ -352,14 +353,14 @@ if __name__ == '__main__':
     app = MainView(root, minimal_distance=10)
 
     # # test purposes
-    app.drawNode(150, 200, 'blue', 'bs')
-    app.drawNode(200, 300, 'green', 'f')
-    app.drawNode(500, 300, 'green', 'f')
-    app.drawNode(400, 100, 'green', 'f')
-    app.generateT()
-    # for node in app.adjacency_map:
-    #     print(node)
-    app.createPathways()
+    # app.drawNode(150, 200, 'blue', 'bs')
+    # app.drawNode(200, 300, 'green', 'f')
+    # app.drawNode(500, 300, 'green', 'f')
+    # app.drawNode(400, 100, 'green', 'f')
+    # app.generateT()
+    # # for node in app.adjacency_map:
+    # #     print(node)
+    # app.createPathways()
 
     root.mainloop()
     root.destroy()  # optional; see description below
